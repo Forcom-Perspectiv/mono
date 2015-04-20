@@ -1,67 +1,15 @@
-Mono is a software platform designed to allow developers to easily create cross platform applications.
-Mono is an open source implementation of Microsoft's .NET Framework based on the ECMA standards for C# and the Common Language Runtime.
-
-[![Build Status](http://jenkins.mono-project.com/job/test-mono-mainline/badge/icon/)](http://jenkins.mono-project.com/job/test-mono-mainline/)
-
-1. [Installation](#compilation-and-installation)
-2. [Using Mono](#using-mono)
-3. [Directory Roadmap](#directory-roadmap)
-4. [Contributing to Mono] (#contributing-to-mono) 
-5. [Git submodules maintenance](#git-submodules-maintenance)
-6. [Reporting bugs](#reporting-bugs)
-
 Compilation and Installation
 ============================
+a. Building the software from GIT
+---------------------------------
 
-a. Build Requirements
----------------------
-
-* On Itanium, you must obtain libunwind: http://www.hpl.hp.com/research/linux/libunwind/download.php4
-
-* On Solaris
-
- 1. Make sure that you used GNU tar to unpack this package, as
- Solaris tar will not unpack this correctly, and you will get strange errors.
-
- 2. Make sure that you use the GNU toolchain to build the software.
-
- 3. Optional dependencies
-
-  * libgdiplus - Required for System.Drawing. This library in turn requires glib and pkg-config
-
-  * pkg-config - Available at: http://www.freedesktop.org/Software/pkgconfig
-
-  * glib 2.4 - Available at: http://www.gtk.org/
-
-  * libzlib - This library and the development headers are required for compression
-file support in the 2.0 profile.
-
- 4. Mono is required to build Mono. Use a system package or monolite (explained further below)
- 
- 5. If you have a system Mono (not monolite), you will need to read this: http://mono-project.com/Parallel_Mono_Environments#Setting_up_a_Build_Environment
-
-b. Building the Software
-------------------------
-
-If you obtained this package as an officially released tarball,
-this is very simple, use configure and make:
-
-`./configure --prefix=/usr/local ; make ; make install`
-
-Mono supports a JIT engine on x86, SPARC, SPARCv9, S/390,
-S/390x, AMD64, ARM and PowerPC systems.   
-
-If you obtained this as a snapshot, you will need an existing
-Mono installation.  To upgrade your installation, unpack both
-mono and mcs:
-
-	tar xzf mcs-XXXX.tar.gz
-	tar xzf mono-XXXX.tar.gz
-	mv mono-XXX mono
-	mv mcs-XXX mcs
-	cd mono
-	./autogen.sh --prefix=/usr/local
+	git clone -b MyFixes-3.12 https://github.com/mono/mono.git
+	git submodule init
+	git submodule update
+	./autogen.sh --with-ikvm-native=no --prefix=/opt/mono/
+	make get-monolite-latest 	monolite_url=http://storage.bos.xamarin.com/mono-dist-master/1b/1b41fd76350367453c8100f8bd0e7242105c6d39/monolite-111-latest.tar.gz
 	make
+	make install
 
 The Mono build system is silent for most compilation commands.
 To enable a more verbose compile (for example, to pinpoint
@@ -69,92 +17,7 @@ problems in your makefiles or your system) pass the V=1 flag to make, like this:
 
 ` make V=1`
 
-
-c. Building the software from GIT
----------------------------------
-
-If you are building the software from GIT, make sure that you
-have up-to-date mcs and mono sources:
-
- * If you are an anonymous user: `git clone git://github.com/mono/mono.git`
-
- * If you are a Mono contributor with read/write privileges: `git clone git@github.com:mono/mono.git`
-
-Then, go into the mono directory, and configure:
-
-	cd mono
-	./autogen.sh --prefix=/usr/local
-	make
-
-For people with non-standard installations of the auto* utils and of
-pkg-config (common on misconfigured OSX and windows boxes), you could get
-an error like this:
-
-	./configure: line 19176: syntax error near unexpected token 'PKG_CHECK_MODULES(BASE_DEPENDENCIES,' ...
-
-This means that you need to set the ACLOCAL_FLAGS environment variable
-when invoking autogen.sh, like this: 
-
-        ACLOCAL_FLAGS="-I $acprefix/share/aclocal" ./autogen.sh --prefix=/usr/local
-
-where $acprefix is the prefix where aclocal has been installed.
-This will automatically go into the mcs/ tree and build the
-binaries there.
-
-This assumes that you have a working mono installation, and that
-there's a C# compiler named 'mcs', and a corresponding IL
-runtime called 'mono'.  You can use two make variables
-EXTERNAL_MCS and EXTERNAL_RUNTIME to override these.  e.g., you
-can say:
-
-	make EXTERNAL_MCS=/foo/bar/mcs EXTERNAL_RUNTIME=/somewhere/else/mono
-
-If you don't have a working Mono installation
----------------------------------------------
-
-If you don't have a working Mono installation, an obvious choice
-is to install the latest released packages of 'mono' for your
-distribution and running `autogen.sh; make; make install` in the
-mono module directory.
-
-You can also try a slightly more risky approach: this may not work,
-so start from the released tarball as detailed above.
-
-This works by first getting the latest version of the 'monolite'
-distribution, which contains just enough to run the 'mcs'
-compiler. You do this with:
-
-	# Run the following line after ./autogen.sh
-	make get-monolite-latest
-
-This will download and automatically gunzip and untar the
-tarball, and place the files appropriately so that you can then
-just run: `make EXTERNAL_MCS=${PWD}/mcs/class/lib/monolite/gmcs.exe`
-
-That will use the files downloaded by 'make get-monolite-latest.
-
-Testing and Installation
-------------------------
-
-You can run *(part of)* the mono and mcs test suites with the command: `make check`.
-All tests should pass.  
-
-If you want more *extensive* tests, including those that test the
-class libraries, you need to re-run 'configure' with the
-'--enable-nunit-tests' flag, and try: `make -k check`
-
-Expect to find a few test suite failures. As a sanity check, you
-can compare the failures you got with
-
-    https://wrench.mono-project.com/Wrench/
-
-You can now install mono with: `make install`
-
-You can verify your installation by using the mono-test-install
-script, it can diagnose some common problems with Mono's install.
-Failure to follow these steps may result in a broken installation. 
-
-d. Configuration Options
+b. Configuration Options
 ------------------------
 
 The following are the configuration options that someone
